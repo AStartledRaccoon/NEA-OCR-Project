@@ -1,9 +1,9 @@
 # NEA Program for OCR
-Prerequisites:
+### Prerequisites ###
 * PIL (pip install PIL)
-* OpenCV (pip install opencv- contrib- python)
+* OpenCV (pip install opencv-contrib-python)
 
-Aims:
+### Aims ###
 - [ ] Ability to train the neural network, this will be hidden from the end user but is necessary 
     - [ ] Take each pixel and get its brightness (I.e. how close the value is to white) 
     - [ ] Assign each of these to a neuron 
@@ -14,6 +14,6 @@ Aims:
     - [ ] An upload button that opens a file browser 
     - [ ] Preview window allowing the user to crop their image 
     - [ ] Ability to view the output and save it in a different format if the user wishes 
-- [ ] User can upload photos of printed text to be scanned (in png format) 
+- [ ] User can upload photos of printed text to be scanned (in PNG or JPEG format) 
 - [ ] Preview and crop photos before scanning 
 - [ ] Find text, scan it and output it to a .txt file or alternatively export to a file of the user's choice 
