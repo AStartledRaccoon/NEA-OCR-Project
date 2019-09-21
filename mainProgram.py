@@ -1,8 +1,8 @@
 #main program space
 #Callum Cafferty
 #NEA
+
 import os
-from os.path import expanduser
 from tkinter import filedialog
 from tkinter import *
 from PIL import Image, ImageTk, ImageDraw
@@ -14,23 +14,55 @@ class GUI(Frame):
         self.grid()
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
         blankimg=Image.open("transparent.png")
-        self.mainWindow(595,842,blankimg)
+        self.mainWindow(595,842,blankimg,True)
         self.__root.mainloop()
-    def addImage(self):
-        self.__filename=filedialog.askopenfilename(initialdir=expanduser('~/Pictures'),title="Select file",filetypes=(("png files","*.png"),("all files","*.*")))
+    def imageDialog(self):
+        self.__filename=filedialog.askopenfilename(initialdir=os.path.expanduser('~/Pictures'),title="Select file",filetypes=(("PNG Images","*.png"),("JPEG Images","*.jpg"),("All files","*.*")))
         self.__userimg=Image.open(self.__filename)
-        imgsize=self.__userimg.size
+        self.addImage(self.__userimg,False)
+    def addImage(self,img,rotate):
+        if rotate==True:
+            imgsize=img.size[::-1]
+        else:
+            imgsize=img.size
+        print ("initial ","x: ",imgsize[0]," y: ",imgsize[1])
         while imgsize[0]>1600 or imgsize[1]>900:
             imgsize=[int(i//1.05) for i in imgsize]
-            print (imgsize)
-        self.__userimg=self.__userimg.resize(imgsize,resample=Image.LANCZOS)    
-        self.mainWindow(*imgsize,self.__userimg)
-    def mainWindow(self,x,y,img):
+            if rotate==True:
+                img=img.resize(imgsize[::-1],Image.LANCZOS)
+            else:
+                img=img.resize(imgsize,Image.LANCZOS)    
+        print ("resized ","x: ",imgsize[0]," y: ",imgsize[1])
+        if rotate==True:
+            self.mainWindow(*img.size[::-1],img,False)
+        else:
+            self.mainWindow(*img.size,img,False)
+    def imageRotate(self, clockwise, img):
+        print (img.size)
+        if clockwise==True:
+            self.addImage(img.rotate(270),True)
+        else:
+            self.addImage(img.rotate(90),True)
+    def crop(self,x,y):
+        pass
+    def mainWindow(self,x,y,img,init):
+        if init==False:
+            self.__canvas.grid_forget()
+            self.__canvas.delete("all")
         self.__imgdisplay=ImageTk.PhotoImage(img)
-        self.__canvas=Canvas(self.__root,width=x,height=y)
-        self.__canvas.grid(row=0)
+        self.__canvas=Canvas(self.__root,width=x,height=y,highlightthickness=1, highlightbackground="black")
+        self.__canvas.grid(row=0,padx=20,pady=10,columnspan=20)
         self.__canvas.create_image(0,0,image=self.__imgdisplay,anchor="nw")
-        self.__imageButton=Button(self.__root, text="Import Image", command=self.addImage)
-        self.__imageButton.grid(row=1)
+        self.__imageButton=Button(self.__root, text="Import Image", command=self.imageDialog,anchor="e")
+        self.__imageButton.grid(column=0,row=1,pady=10,padx=2)
+        self.__antiIco=ImageTk.PhotoImage(file="Icons/anticlockwise.ico")
+        self.__antiRotate=Button(self.__root,image=self.__antiIco,command=lambda: self.imageRotate(False,img),anchor="e")
+        self.__antiRotate.grid(column=17,row=1,padx=2,pady=10)
+        self.__clockwiseIco=ImageTk.PhotoImage(file="Icons/clockwise.ico")
+        self.__clockRotate=Button(self.__root, image=self.__clockwiseIco,command=lambda: self.imageRotate(True,img),anchor="e")
+        self.__clockRotate.grid(column=18,row=1,padx=2,pady=10)
+        self.__cropIco=ImageTk.PhotoImage(file="Icons/crop.ico")
+        self.__cropButton=Button(self.__root, image=self.__cropIco,command=lambda: self.crop(x,y),anchor="e")
+        self.__cropButton.grid(column=19,row=1,padx=2,pady=10)
 instance=GUI(Tk())
     
