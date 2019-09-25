@@ -16,3 +16,6 @@
     - [x] Rotate photos before scanning
     - [ ] Ability to view the output and save it in a different format if the user wishes
 - [ ] Detect, isolate and prepare text in an image to be sent into the network
+    - [ ] Text detection
+    - [ ] Character segmentation
+    - [ ] Threshold character image and other preparation means
