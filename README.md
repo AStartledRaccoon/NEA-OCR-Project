@@ -11,9 +11,8 @@
     - [ ] Once it's gone through these layers, it goes to the final layer, with a neuron for each character 
 - [ ] An easily understandable, clear and simple GUI containing: 
     - [ ] An info sheet in html that opens in the user's default html viewer 
-    - [ ] An upload button that opens a file browser 
-    - [ ] Preview window allowing the user to crop their image 
-    - [ ] Ability to view the output and save it in a different format if the user wishes 
-- [ ] User can upload photos of printed text to be scanned (in PNG or JPEG format) 
-- [ ] Preview and crop photos before scanning 
-- [ ] Find text, scan it and output it to a .txt file or alternatively export to a file of the user's choice 
+    - [x] User can upload photos of printed text to be scanned (in PNG or JPEG format) with an upload button that creates a file dialog 
+    - [ ] Preview and crop photos before scanning 
+    - [x] Rotate photos before scanning
+    - [ ] Ability to view the output and save it in a different format if the user wishes
+- [ ] Detect, isolate and prepare text in an image to be sent into the network
