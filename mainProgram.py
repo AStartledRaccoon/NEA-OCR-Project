@@ -21,28 +21,18 @@ class GUI(Frame):
         self.__userimg=Image.open(self.__filename)
         self.addImage(self.__userimg,False)
     def addImage(self,img,rotate):
-        if rotate==True:
-            imgsize=img.size[::-1]
-        else:
-            imgsize=img.size
+        imgsize=img.size
         print ("initial ","x: ",imgsize[0]," y: ",imgsize[1])
         while imgsize[0]>1600 or imgsize[1]>900:
             imgsize=[int(i//1.05) for i in imgsize]
-            if rotate==True:
-                img=img.resize(imgsize[::-1],Image.LANCZOS)
-            else:
-                img=img.resize(imgsize,Image.LANCZOS)    
-        print ("resized ","x: ",imgsize[0]," y: ",imgsize[1])
-        if rotate==True:
-            self.mainWindow(*img.size[::-1],img,False)
-        else:
-            self.mainWindow(*img.size,img,False)
+            img=img.resize(imgsize,Image.LANCZOS)    
+        self.mainWindow(*img.size,img,False)
     def imageRotate(self, clockwise, img):
         print (img.size)
         if clockwise==True:
-            self.addImage(img.rotate(270),True)
+            self.addImage(img.rotate(270,expand=1),True)
         else:
-            self.addImage(img.rotate(90),True)
+            self.addImage(img.rotate(90,expand=1),True)
     def crop(self,x,y):
         pass
     def mainWindow(self,x,y,img,init):
@@ -64,5 +54,9 @@ class GUI(Frame):
         self.__cropIco=ImageTk.PhotoImage(file="Icons/crop.ico")
         self.__cropButton=Button(self.__root, image=self.__cropIco,command=lambda: self.crop(x,y),anchor="e")
         self.__cropButton.grid(column=19,row=1,padx=2,pady=10)
+        if init==True:
+            self.__antiRotate.config(state=DISABLED)
+            self.__clockRotate.config(state=DISABLED)
+            self.__cropButton.config(state=DISABLED)
 instance=GUI(Tk())
     
