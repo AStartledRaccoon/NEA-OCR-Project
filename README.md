@@ -12,7 +12,7 @@
 - [ ] An easily understandable, clear and simple GUI containing: 
     - [ ] An info sheet in html that opens in the user's default html viewer 
     - [x] User can upload photos of printed text to be scanned (in PNG or JPEG format) with an upload button that creates a file dialog 
-    - [ ] Preview and crop photos before scanning 
+    - [x] Preview and crop photos before scanning 
     - [x] Rotate photos before scanning
     - [ ] Ability to view the output and save it in a different format if the user wishes
 - [ ] Detect, isolate and prepare text in an image to be sent into the network
