@@ -102,6 +102,18 @@ class GUI(Frame):
         if init==True:
             self.__antiRotate.config(state=DISABLED)
             self.__clockRotate.config(state=DISABLED)
-            #self.__cropButton.config(state=DISABLED)
-instance=GUI(Tk())
+            self.__cropButton.config(state=DISABLED)
+
+class neuralNetwork:
+    def __init__(self):
+        self.__dir=os.path.dirname(os.path.realpath(__file__))
+        os.chdir(self.__dir)
+    def createMiniBatch(self):
+        print(len(os.listdir(self.__dir+"/Chars74K/")))
+        for i in range (0,32):
+            pass
+
+network1=neuralNetwork()
+network1.createMiniBatch()   
+#instance=GUI(Tk())
     
