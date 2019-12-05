@@ -1,8 +1,7 @@
 #main program space
 #Callum Cafferty
 #NEA
-
-import os
+import os, textDetect
 from tkinter import filedialog
 from tkinter import *
 from PIL import Image, ImageTk, ImageDraw
@@ -14,7 +13,7 @@ class GUI(Frame):
         self.grid()
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
         blankimg=Image.open("transparent.png")
-        self.mainWindow(595,842,blankimg,True)
+        self.mainWindow(595,842,blankimg,True) #Sets up the main window 
         self.__root.mainloop()
     def imageDialog(self):
         self.__filename=filedialog.askopenfilename(initialdir=os.path.expanduser('~/Pictures'),title="Select file",filetypes=(("PNG Images","*.png"),("JPEG Images","*.jpg"),("All files","*.*")))
@@ -24,7 +23,9 @@ class GUI(Frame):
         imgsize=img.size
         while imgsize[0]>1600 or imgsize[1]>900:
             imgsize=[int(i//1.05) for i in imgsize]
-            img=img.resize(imgsize,Image.LANCZOS)    
+            img=img.resize(imgsize,Image.LANCZOS)
+        imgsize=[round(i/32)*32 for i in imgsize]
+        img=img.resize(imgsize,Image.LANCZOS)
         self.mainWindow(*img.size,img,False)
     def imageRotate(self, clockwise, img):
         if clockwise==True:
@@ -77,13 +78,17 @@ class GUI(Frame):
         self.__canvas.bind("<ButtonRelease-1>",lambda event: self.cropEnd(event,img))
         self.__root.bind("<Escape>",self.stopCrop)
         self.__shape=self.__canvas.create_rectangle
+    def textScan(self):
+        self.__img.save("temp.png")
+        print(textDetect.textDetection("temp.png"))
     def mainWindow(self,x,y,img,init):
         if init==False:
             self.__canvas.grid_forget()
             self.__canvas.delete("all")
+        self.__img=img
         self.__imgdisplay=ImageTk.PhotoImage(img)
         self.__canvas=Canvas(self.__root,width=x,height=y,highlightthickness=1, highlightbackground="black")
-        self.__canvas.grid(row=0,padx=20,pady=10,columnspan=20)
+        self.__canvas.grid(row=0,padx=20,pady=10,columnspan=21)
         self.__canvas.create_image(0,0,image=self.__imgdisplay,anchor="nw")
         self.__imageButton=Button(self.__root, text="Import Image", command=self.imageDialog,anchor="e")
         self.__imageButton.grid(column=0,row=1,pady=10,padx=2)
@@ -98,22 +103,16 @@ class GUI(Frame):
         self.__cropIco=ImageTk.PhotoImage(file="Icons/crop.ico")
         self.__cropButton=Button(self.__root, image=self.__cropIco,command=lambda: self.crop(x,y,img),anchor="e")
         self.__cropButton.grid(column=19,row=1,padx=2,pady=10)
-        self.__textScan=Button(self.__root,)
+        self.__scanIco=ImageTk.PhotoImage(Image.open("Icons/scan.ico").resize((32,32),Image.ANTIALIAS).convert("RGBA"))
+        self.__scanButton=Button(self.__root, image=self.__scanIco, command=self.textScan, anchor="e")
+        self.__scanButton.grid(column=20, row=1, padx=2, pady=10)
         if init==True:
             self.__antiRotate.config(state=DISABLED)
             self.__clockRotate.config(state=DISABLED)
             self.__cropButton.config(state=DISABLED)
-
-class neuralNetwork:
+            self.__scanButton.config(state=DISABLED)
+class scanText:
     def __init__(self):
-        self.__dir=os.path.dirname(os.path.realpath(__file__))
-        os.chdir(self.__dir)
-    def createMiniBatch(self):
-        print(len(os.listdir(self.__dir+"/Chars74K/")))
-        for i in range (0,32):
-            pass
-
-network1=neuralNetwork()
-network1.createMiniBatch()   
-#instance=GUI(Tk())
+        document=None
+instance=GUI(Tk())
     

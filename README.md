@@ -1,7 +1,29 @@
 # NEA Program for OCR
 ### Prerequisites ###
-* PIL (pip install PIL)
-* OpenCV (pip install opencv-contrib-python)
+* Python
+* Pip
+* OpenCV
+* PIL
+
+### Installation Instructions ###
+#### Windows ####
+##### Pip #####
+1. Download get-pip.py from https://bootstrap.pypa.io/get-pip.py
+2. Open a command prompt and go to to the folder you installed get-pip.py to 
+3. Run the command `python get-pip.py`
+4. (Optional) Verify that pip is installed by running the command `pip -V`
+
+##### PIL ######
+1. Open a command prompt
+2. Run the command `pip install Pillow`
+
+##### Numpy #####
+1. Open a a command prompt
+2. Run the command `pip install numpy`
+
+##### OpenCV #####
+1. Open a command prompt
+2. Run the command `pip install opencv-contrib-python`
 
 ### Aims ###
 - [ ] Ability to train the neural network, this will be hidden from the end user but is necessary 
@@ -16,6 +38,6 @@
     - [x] Rotate photos before scanning
     - [ ] Ability to view the output and save it in a different format if the user wishes
 - [ ] Detect, isolate and prepare text in an image to be sent into the network
-    - [ ] Text detection
+    - [x] Text detection
     - [ ] Character segmentation
     - [ ] Threshold character image and other preparation means
