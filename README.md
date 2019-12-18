@@ -6,7 +6,7 @@
 * PIL
 * scikit-image
 * scikit-learn
-* TensorFlow (version 1.x)
+* TensorFlow (version 2.x)
 ### Installation Instructions ###
 #### Windows ####
 ##### Pip #####
