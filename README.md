@@ -4,7 +4,9 @@
 * Pip
 * OpenCV
 * PIL
-
+* scikit-image
+* scikit-learn
+* TensorFlow (version 1.x)
 ### Installation Instructions ###
 #### Windows ####
 ##### Pip #####
@@ -25,9 +27,22 @@
 1. Open a command prompt
 2. Run the command `pip install opencv-contrib-python`
 
+##### scikit-image #####
+1. Open a command prompt
+2. Run the command `pip install scikit-image`
+
+##### scikit-learn #####
+1. Open a command prompt
+2. Run the command `pip install scikit-learn`
+
+##### TensorFlow #####
+1. Open a command prompt
+2. Run the command `pip install tensorflow`
+
+
 ### Aims ###
 - [ ] Ability to train the neural network, this will be hidden from the end user but is necessary 
-    - [ ] Take each pixel and get its brightness (I.e. how close the value is to white) 
+    - [x] Take each pixel and get its brightness (I.e. how close the value is to white) 
     - [ ] Assign each of these to a neuron 
     - [ ] Send it through a certain number of hidden layers, each with another certain number of neurons (need to research how many I should use) 
     - [ ] Once it's gone through these layers, it goes to the final layer, with a neuron for each character 
@@ -37,7 +52,7 @@
     - [x] Preview and crop photos before scanning 
     - [x] Rotate photos before scanning
     - [ ] Ability to view the output and save it in a different format if the user wishes
-- [ ] Detect, isolate and prepare text in an image to be sent into the network
+- [x] Detect, isolate and prepare text in an image to be sent into the network
     - [x] Text detection
-    - [ ] Character segmentation
-    - [ ] Threshold character image and other preparation means
+    - [x] Character segmentation
+    - [x] Threshold character image and other preparation means
