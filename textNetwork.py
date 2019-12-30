@@ -1,54 +1,33 @@
 #tensorFlowImages
-import tensorflow as tf, numpy as np, os, pathlib
+import tensorflow as tf, numpy as np, os, pathlib,random
 from PIL import Image
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
-AUTOTUNE=tf.data.experimental.AUTOTUNE #Creates an easy to use version fo the autotune 
-data_dir=pathlib.Path("Chars74KResized")
-image_count=len(list(data_dir.glob('*/*.png'))) #Counts all the images 
-list_data=tf.data.Dataset.list_files(str(data_dir/"*/*")) #Finds all the files
-letters=np.array([item.name for item in data_dir.glob('*')]) #Gets the letters (directory names)
-batchSize=32 #Sets batch size (batches that are fed into network)
-imgHeight=40
-imgWidth=40 #Image dimensions
-stepsPerEpoch=np.ceil(image_count/batchSize)
-def labelFromPath(file_path):
-    parts=tf.strings.split(file_path, os.path.sep)
-    label=parts[-2]==letters #Gets the labels
-    img=tf.io.read_file(file_path)
-    img=tf.image.decode_png(img, channels=3)
-    img=tf.image.convert_image_dtype(img,tf.float32)  #Converts the image to a form tensorflow can read
-    return img, label 
-labeled_ds=list_ds.map(labelFromPath,num_parallel_calls=AUTOTUNE) #Creates a map that tensorflow can read
-def trainingPrep(ds, cache=True,shuffle_buffer_size=1000):
-    if cache:
-        if isinstance(cache,str):
-            ds=ds.cache(cache) #Caches data to save time
-        else:
-            ds=ds.cache()
-    data=data.shuffle(buffer_size=shuffle_buffer_size)
-    data=data.repeat()
-    data=data.batch(batchSize) #Correctly shuffles the data and puts it into batches
-    return data
-train_data=trainingPrep(labeled_data)
-image_batch,label_batch=next(iter(train_data))
-learning_rate=0.5
-epochs=5 #The number of full cycles throught the training data
-x=tf.placeholder(tf.float32,[None,1600])
-y=tf.placeholder(tf.float32,[None,62])
-#Having 4 hidden layers due to formula (will add to word document) 
-#Decrease by about 250 nodes per layer? Will have to research size of hidden layers
-W1=tf.Variable(tf.random_normal([1600,1350],stddev=0.03),name="W1")
-B1=tf.Variable(tf.randm_normal([1350]),name="B1")
-W2=tf.Variable(tf.random_normal([1350,1100],stddev=0.03),name="W2")
-B2=tf.Variable(tf.randm_normal([1100]),name="B2")
-W3=tf.Variable(tf.random_normal([1100,850],stddev=0.03),name="W3")
-B3=tf.Variable(tf.randm_normal([850]),name="B3")
-W4=tf.Variable(tf.random_normal([850,600],stddev=0.03),name="W4")
-B4=tf.Variable(tf.randm_normal([600]),name="B4")
-W5=tf.Variable(tf.random_normal([600,350],stddev=0.03),name="W5")
-B5=tf.Variable(tf.randm_normal([350]),name="B5")
-W6=tf.Variable(tf.random_normal([350,100],stddev=0.03),name="W6")
-B6=tf.Variable(tf.randm_normal([100]),name="B6")#
-W7=tf.Variable(tf.random_normal([100,62],stddev=0.03),name="W7")
-B7=tf.Variable(tf.randm_normal([62]),name="B7")
-#Crreates random biases and weights
+def trainModel(epochs,batchSize,hiddenLayers,layerSize,filename):
+   dict={'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15, 'G': 16, 'H': 17, 'I': 18, 'J': 19, 'K': 20, 'L': 21, 'M': 22, 'N': 23, 'O': 24, 'P': 25, 'Q': 26, 'R': 27, 'S': 28, 'T': 29, 'U': 30, 'V': 31, 'W': 32, 'X': 33, 'Y': 34, 'Z': 35, 'a': 36, 'b': 37, 'c': 38, 'd': 39, 'e': 40, 'f': 41, 'g': 42, 'h': 43, 'i': 44, 'j': 45, 'k': 46, 'l': 47, 'm': 48, 'n': 49, 'o': 50, 'p': 51, 'q': 52, 'r': 53, 's': 54, 't': 55, 'u': 56, 'v': 57, 'w': 58, 'x': 59, 'y': 60, 'z': 61}
+   data,labels=[],[]
+   for i in os.listdir("Chars74KResized"):
+     for j in os.listdir("Chars74KResized/"+i):
+           im=Image.open("Chars74KResized/"+i+"/"+j)
+           data.append(np.asarray(im))
+           labels.append(dict[i])
+   c = list(zip(data, labels))
+   random.shuffle(c)
+   data, labels = zip(*c)
+   data,labels=np.asarray(data,dtype=np.float32),np.asarray(labels)
+   model = tf.keras.models.Sequential()
+   model.add(tf.keras.layers.Flatten(input_shape=(40, 40)))
+   for i in range (0,hiddenLayers):
+     model.add( tf.keras.layers.Dense(layerSize, activation='relu'))
+   model.add(tf.keras.layers.Dense(62, activation='softmax'))
+   model.compile(optimizer='adam',loss='sparse_categorical_crossentropy',metrics=['accuracy'])
+   model.fit(data, labels, epochs=epochs,batch_size=batchSize,shuffle=True,steps_per_epoch=450,verbose=1,use_multiprocessing=True)
+   model.save("models/"+filename+".h5")
+def getPredict(filename,image):
+    model=tf.keras.models.load_model("models/"+filename+".h5")
+    reverseDict={0: '0', 1: '1', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9', 10: 'A', 11: 'B', 12: 'C', 13: 'D', 14: 'E', 15: 'F', 16: 'G', 17: 'H', 18: 'I', 19: 'J', 20: 'K', 21: 'L', 22: 'M', 23: 'N', 24: 'O', 25: 'P', 26: 'Q', 27: 'R', 28: 'S', 29: 'T', 30: 'U', 31: 'V', 32: 'W', 33: 'X', 34: 'Y', 35: 'Z', 36: 'a', 37: 'b', 38: 'c', 39: 'd', 40: 'e', 41: 'f', 42: 'g', 43: 'h', 44: 'i', 45: 'j', 46: 'k', 47: 'l', 48: 'm', 49: 'n', 50: 'o', 51: 'p', 52: 'q', 53: 'r', 54: 's', 55: 't', 56: 'u', 57: 'v', 58: 'w', 59: 'x', 60: 'y', 61: 'z'}
+    results=model.predict_classes(image,verbose=0)
+    endstr="".join([reverseDict[i] for i in results])
+    return endstr
+trainModel(1000,64,7,1129,"default_model")
+    
+    
