@@ -1,5 +1,5 @@
 from imutils.object_detection import non_max_suppression
-import numpy, cv2, os, math
+import numpy as np, cv2, os, math,random
 from PIL import Image, ImageFilter
 os.chdir(os.path.dirname(os.path.realpath(__file__)))#Sets the path to be where the file is incase it isn't already there 
 def textDetection(image):
@@ -26,8 +26,8 @@ def textDetection(image):
 				continue#If the score doesn't meet the minimum confidence, ignore
 			(offsetX,offsetY)=(x*4.0,y*4.0)#Gets the offset factor (to account for size)
 			angle=anglesData[x]
-			cos=numpy.cos(angle)
-			sin=numpy.sin(angle) #Calculate the rotation angles if any
+			cos=np.cos(angle)
+			sin=np.sin(angle) #Calculate the rotation angles if any
 			h=xData0[x]+xData2[x] #Get width and height of bounding box
 			w=xData1[x]+xData3[x]
 			endX=int(offsetX+(cos*xData1[x])+(sin*xData2[x]))
@@ -36,7 +36,7 @@ def textDetection(image):
 			startY=int(endY-h) #Get the start and end co-ords
 			boundBox.append((startX,startY,endX,endY))
 			confidences.append(scoresData[x])
-	finalBoxes = non_max_suppression(numpy.array(boundBox), probs=confidences) #Finds bounding boxes that are weak and/or overlapping and removes them using non max suppression
+	finalBoxes = non_max_suppression(np.array(boundBox), probs=confidences) #Finds bounding boxes that are weak and/or overlapping and removes them using non max suppression
 	return finalBoxes
 def thresholdImage(image):
     image=cv2.imread(image,0)
@@ -55,17 +55,16 @@ def characterSegment(image):
 def fitImage(image):
 	x,y=image.size
 	while x>40 or y>40:
-		x,y=(i//1.05 for i in (x,y))
+		x,y=(i/1.05 for i in (x,y))
 	while x<40 or y<40:
 		if any((i*1.05>40 for i in (x,y))):
 			break
 		else:
 			x,y=(i*1.05 for i in (x,y)) #Checks the size of the image and either enlarges it or shrinks it to fit
 	x,y=(int(math.floor(i)) for i in (x,y))
-	image.resize((x,y),Image.LANCZOS).convert("RGBA")
-	img=Image.new("RGBA",(40,40),(0,0,0))
+	image=image.resize((x,y),Image.LANCZOS).convert("RGBA")
+	img=Image.new("1",(40,40),0)
 	offset=((40-x)//2,(40-y)//2)
 	img.paste(image,offset) #Puts the image in the centre of a 40x40 black canvas
 	img.filter(ImageFilter.SMOOTH_MORE)#Smooths the image a bit 
 	return img
-	
