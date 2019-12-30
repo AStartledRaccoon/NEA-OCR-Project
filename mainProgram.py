@@ -1,8 +1,8 @@
 #main program space
 #Callum Cafferty
 #NEA
-import os, imagePrep
-from tkinter import filedialog
+import os, imagePrep,textNetwork,string,tkinter.messagebox,numpy as np
+from tkinter import filedialog, ttk
 from tkinter import *
 from PIL import Image, ImageTk, ImageDraw, ImageOps
 class GUI(Frame):
@@ -11,7 +11,12 @@ class GUI(Frame):
         self.__root=master
         self.__root.title("OCR AI")
         self.grid()
+        self.__netName="default_model"
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
+        self.__hiddenCount=7
+        self.__hiddenSize=1129
+        self.__batchSize=64
+        self.__epochs=29
         blankimg=Image.open("transparent.png")
         self.mainWindow(595,842,blankimg,True) #Sets up the main window  with a placeholder image
         self.__root.mainloop()
@@ -28,12 +33,93 @@ class GUI(Frame):
         img=img.resize(imgsize,Image.LANCZOS) #Resizes the image to be less than 1600x900
         self.mainWindow(*img.size,img,False) #Reforms the main window
     def imageRotate(self, clockwise, img):
-        if clockwise==True:
+        if clockwise:
             self.addImage(img.rotate(270,expand=1))
         else:
             self.addImage(img.rotate(90,expand=1)) #Rotates the image then passes it to the addImage subroutine for resizing
     def trainNetwork(self):
-            pass
+        self.__netName=self.__saveNetEntry.get()
+        fullLs=list(string.ascii_letters+string.digits)
+        bannedList=["\\", "/", ":", "*", '"', "<", ">", "|"]
+        try:
+            if any(char in fullLs for char in str(self.__netName)) and  not any(char in bannedList for char in str(self.__netName)) and str(self.__netName)!="default_model":
+                textNetwork.trainModel(self.__epochs, self.__batchSize, self.__hiddenCount, self.__hiddenSize, self.__netName)
+            else:
+                1/0
+        except:
+            Tk().withdraw()
+            tkinter.messagebox.showerror(title="Error",message="Invalid filename")
+            return
+    def closeNetworkWindow(self):
+        self.__networkChoice=self.__chooseNetwork.get()
+        self.__networkWindow.destroy()
+    def closeTrainWindow(self):
+        try:
+            self.__hiddenCount=int(self.__hiddenCountEntry.get())
+            self.__hiddenSize=int(self.__hiddenSizeEntry.get())
+            self.__batchSize=int(self.__batchSizeEntry.get())
+            self.__epochs=int(self.__epochsEntry.get())
+            self.__trainSettings.destroy()
+        except:
+            Tk().withdraw()
+            tkinter.messagebox.showerror(title="Error",message="One of your values is invalid, check you have entered only integers and try again")
+            return
+    def resetTrainDefault(self):
+        self.__hiddenCount=7
+        self.__hiddenSize=1129
+        self.__batchSize=64
+        self.__epochs=29
+        self.__hiddenCountEntry.delete('0', 'end')
+        self.__hiddenCountEntry.insert(0,str(self.__hiddenCount))
+        self.__hiddenSizeEntry.delete('0', 'end')
+        self.__hiddenSizeEntry.insert(0,str(self.__hiddenSize))
+        self.__batchSizeEntry.delete('0', 'end')
+        self.__batchSizeEntry.insert(0,str(self.__batchSize))    
+        self.__epochsEntry.delete('0', 'end')
+        self.__epochsEntry.insert(0,str(self.__epochs))
+    def networkSettings(self):
+        self.__networkWindow=Toplevel()
+        self.__networkWindow.title("Network Settings")
+        self.__savedModelLabel=Label(self.__networkWindow,text="Saved Networks:",anchor="w",width=21).grid(row=0,column=0,columnspan=2)
+        self.__chooseNetwork=ttk.Combobox(self.__networkWindow,values=os.listdir("models"), width=30)
+        self.__chooseNetwork.set("default_model.h5")
+        self.__chooseNetwork.grid(row=0,column=2,columnspan=2,sticky="W")
+        self.__saveNetLabel=Label(self.__networkWindow,text="Save trained network as: ", width=21, anchor="w").grid(row=1,column=0,columnspan=2)
+        self.__saveNetEntry=Entry(self.__networkWindow, width=30)
+        self.__saveNetEntry.grid(row=1,column=2,columnspan=2,sticky="W")
+        self.__trainSettings=Button(self.__networkWindow,text="Train Settings",anchor="w",command=self.trainSettings)
+        self.__trainSettings.grid(row=2,column=1,pady=10)
+        self.__trainButton=Button(self.__networkWindow,text="Train Network", command=self.trainNetwork)
+        self.__trainButton.grid(row=2,column=2)
+        self.__close=Button(self.__networkWindow, text="Close",command=self.closeNetworkWindow)
+        self.__close.grid(row=2,column=3, padx=20)
+    def trainSettings(self):
+        self.__trainSettings=Toplevel()
+        self.__trainSettings.title("Train Settings")
+        self.__hiddenCountLabel=Label(self.__trainSettings,text="Hidden layers: ").grid(column=0,row=0)
+        self.__hiddenCountEntry=Entry(self.__trainSettings,width=3)
+        self.__hiddenCountEntry.insert(0,str(self.__hiddenCount))
+        self.__hiddenCountEntry.bind("<FocusIn>", lambda args: self.__hiddenCountEntry.delete('0', 'end'))
+        self.__hiddenCountEntry.grid(column=1,row=0, pady=10)
+        self.__hiddenSizeLabel=Label(self.__trainSettings,text="Hidden layer size: ").grid(column=2,row=0)
+        self.__hiddenSizeEntry=Entry(self.__trainSettings,width=5)
+        self.__hiddenSizeEntry.insert(0,str(self.__hiddenSize))
+        self.__hiddenSizeEntry.bind("<FocusIn>", lambda args: self.__hiddenSizeEntry.delete('0', 'end'))
+        self.__hiddenSizeEntry.grid(column=3,row=0)
+        self.__batchSizeLabel=Label(self.__trainSettings,text="Batch size: ").grid(column=0,row=1)
+        self.__batchSizeEntry=Entry(self.__trainSettings,width=4)
+        self.__batchSizeEntry.insert(0,str(self.__batchSize))
+        self.__batchSizeEntry.bind("<FocusIn>", lambda args: self.__batchSizeEntry.delete('0', 'end'))
+        self.__batchSizeEntry.grid(column=1,row=1)
+        self.__epochsLabel=Label(self.__trainSettings,text="Epochs: ").grid(column=2,row=1)
+        self.__epochsEntry=Entry(self.__trainSettings,width=3)
+        self.__epochsEntry.insert(0,str(self.__epochs))
+        self.__epochsEntry.bind("<FocusIn>", lambda args: self.__epochsEntry.delete('0', 'end'))
+        self.__epochsEntry.grid(column=3,row=1)
+        self.__close=Button(self.__trainSettings, text="Close",command=self.closeTrainWindow,anchor="e")
+        self.__close.grid(row=2,column=0,columnspan=2)
+        self.__reset=Button(self.__trainSettings, text="Reset to default",command=self.resetTrainDefault,anchor="e")
+        self.__reset.grid(row=2,column=2,columnspan=2)
     def cancelCrop(self):
         self.__cropConfirm.destroy()
         self.__canvas.delete(self.__drawn)
@@ -92,6 +178,12 @@ class GUI(Frame):
             characterlist.append([Image.fromarray(i) for i in imagePrep.characterSegment("tmp/temp2.png")]) #Creates a lst of segmented character images
         for x in characterlist:
             resizedList.append([imagePrep.fitImage(i) for i in x]) #Creates a list of the resized characters
+        resizedList[0][0].show()
+        #print (resizedList[0][0].size)
+        #print (np.array(Image.open("/home/callum/Documents/Schoolwork/Computing/NEA/Chars74KResized/L/img022-00001.png")).shape)
+        #print(np.array(resizedList[0][0]).shape)
+        for x in resizedList:
+            print(textNetwork.getPredict(self.__netName,np.asarray([np.asarray(i) for i in x],dtype=np.float32)))
     def mainWindow(self,x,y,img,init):
         if init==False:
             self.__canvas.grid_forget()
@@ -103,8 +195,8 @@ class GUI(Frame):
         self.__canvas.create_image(0,0,image=self.__imgdisplay,anchor="nw")#Adds the image to the canvas
         self.__imageButton=Button(self.__root, text="Import Image", command=self.imageDialog,anchor="e")
         self.__imageButton.grid(column=0,row=1,pady=10,padx=2)
-        self.__trainButton=Button(self.__root, text="Train Network", command=self.trainNetwork,anchor="e")
-        self.__trainButton.grid(column=1,row=1,pady=10,padx=2) #Create the two text buttons on the left
+        self.__networkSettings=Button(self.__root, text="Network Settings", command=self.networkSettings,anchor="e")
+        self.__networkSettings.grid(column=1,row=1,pady=10,padx=2) #Create the two text buttons on the left
         self.__antiIco=ImageTk.PhotoImage(file="Icons/anticlockwise.ico")
         self.__antiRotate=Button(self.__root,image=self.__antiIco,command=lambda: self.imageRotate(False,img),anchor="w")
         self.__antiRotate.grid(column=17,row=1,padx=2,pady=10)
@@ -117,7 +209,7 @@ class GUI(Frame):
         self.__scanIco=ImageTk.PhotoImage(Image.open("Icons/scan.ico").resize((32,32),Image.ANTIALIAS).convert("RGBA")) #Resizes the scan icon
         self.__scanButton=Button(self.__root, image=self.__scanIco, command=self.textScan, anchor="w")
         self.__scanButton.grid(column=20, row=1, padx=2, pady=10) #Creates all the icons and their respective bbuttons
-        if init==True:
+        if init:
             self.__antiRotate.config(state=DISABLED)
             self.__clockRotate.config(state=DISABLED)
             self.__cropButton.config(state=DISABLED)
