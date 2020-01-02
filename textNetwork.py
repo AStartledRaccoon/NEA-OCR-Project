@@ -4,23 +4,48 @@ from PIL import Image
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 def trainModel(epochs,batchSize,hiddenLayers,layerSize,filename):
    dict={'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15, 'G': 16, 'H': 17, 'I': 18, 'J': 19, 'K': 20, 'L': 21, 'M': 22, 'N': 23, 'O': 24, 'P': 25, 'Q': 26, 'R': 27, 'S': 28, 'T': 29, 'U': 30, 'V': 31, 'W': 32, 'X': 33, 'Y': 34, 'Z': 35, 'a': 36, 'b': 37, 'c': 38, 'd': 39, 'e': 40, 'f': 41, 'g': 42, 'h': 43, 'i': 44, 'j': 45, 'k': 46, 'l': 47, 'm': 48, 'n': 49, 'o': 50, 'p': 51, 'q': 52, 'r': 53, 's': 54, 't': 55, 'u': 56, 'v': 57, 'w': 58, 'x': 59, 'y': 60, 'z': 61}
-   data,labels=[],[]
+   data,labels,testdata,testlabels=[],[],[],[]
    for i in os.listdir("Chars74KResized"):
-     for j in os.listdir("Chars74KResized/"+i):
+      x=random.sample(range(0,1016),6)
+      dir=os.listdir("Chars74KResized/"+i)
+      for j in dir:
            im=Image.open("Chars74KResized/"+i+"/"+j)
-           data.append(np.asarray(im))
-           labels.append(dict[i])
+           if dir.index(j) in x:
+               testdata.append(np.asarray(im))
+               testlabels.append(dict[i])
+           else:
+               data.append(np.asarray(im))
+               labels.append(dict[i])
+   #lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(0.001,decay_steps=(len(labels)/batchSize)*1000,decay_rate=1,staircase=False)
+   #optimiser=tf.keras.optimizers.Adam(tf.keras.optimizers.schedules.InverseTimeDecay(0.001,decay_steps=4922,decay_rate=0.5,staircase=False))
    c = list(zip(data, labels))
    random.shuffle(c)
    data, labels = zip(*c)
    data,labels=np.asarray(data,dtype=np.float32),np.asarray(labels)
+   data=data/255.0
+   c = list(zip(testdata, testlabels))
+   random.shuffle(c)
+   testdata, testlabels = zip(*c)
+   testdata,testlabels=np.asarray(testdata,dtype=np.float32),np.asarray(testlabels)
+   testdata=testdata/255.0
+   data = data.reshape((data.shape[0], data.shape[1], data.shape[2], 1))
+   testdata = testdata.reshape((testdata.shape[0], testdata.shape[1], testdata.shape[2], 1))
+   inputShape=data.shape[1:]
    model = tf.keras.models.Sequential()
-   model.add(tf.keras.layers.Flatten(input_shape=(40, 40)))
+   model.add(tf.keras.layers.Conv2D(16, (3,3), activation='relu', kernel_initializer='he_uniform', input_shape=inputShape))
+   model.add(tf.keras.layers.MaxPooling2D((2, 2)))
+   model.add(tf.keras.layers.Conv2D(32, (3,3), activation='relu', kernel_initializer='he_uniform', input_shape=inputShape))
+   model.add(tf.keras.layers.MaxPooling2D((2, 2)))
+   model.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu'))
+   model.add(tf.keras.layers.Flatten())
    for i in range (0,hiddenLayers):
      model.add( tf.keras.layers.Dense(layerSize, activation='relu'))
+     #model.add(tf.keras.layers.Dropout(0.2))
+   model.add(tf.keras.layers.Dropout(0.4))
    model.add(tf.keras.layers.Dense(62, activation='softmax'))
-   model.compile(optimizer='adam',loss='sparse_categorical_crossentropy',metrics=['accuracy'])
-   model.fit(data, labels, epochs=epochs,batch_size=batchSize,shuffle=True,steps_per_epoch=450,verbose=1,use_multiprocessing=True)
+   model.compile(optimizer="adam",loss='sparse_categorical_crossentropy',metrics=['accuracy'])
+   model.fit(data, labels, epochs=epochs,batch_size=batchSize,validation_data=(testdata,testlabels),shuffle="batch",steps_per_epoch=None,verbose=1,use_multiprocessing=True)
+   model.evaluate(testdata,  testlabels, verbose=2)
    model.save("models/"+filename+".h5")
 def getPredict(filename,image):
     model=tf.keras.models.load_model("models/"+filename+".h5")
@@ -28,6 +53,4 @@ def getPredict(filename,image):
     results=model.predict_classes(image,verbose=0)
     endstr="".join([reverseDict[i] for i in results])
     return endstr
-trainModel(1000,64,7,1129,"default_model")
-    
-    
+trainModel(20,32,1,128,"default_model")    

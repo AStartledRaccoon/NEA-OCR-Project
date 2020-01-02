@@ -51,7 +51,7 @@ class GUI(Frame):
             tkinter.messagebox.showerror(title="Error",message="Invalid filename")
             return
     def closeNetworkWindow(self):
-        self.__networkChoice=self.__chooseNetwork.get()
+        self.__netName=self.__chooseNetwork.get()[:-3]
         self.__networkWindow.destroy()
     def closeTrainWindow(self):
         try:
@@ -179,11 +179,10 @@ class GUI(Frame):
         for x in characterlist:
             resizedList.append([imagePrep.fitImage(i) for i in x]) #Creates a list of the resized characters
         resizedList[0][0].show()
-        #print (resizedList[0][0].size)
-        #print (np.array(Image.open("/home/callum/Documents/Schoolwork/Computing/NEA/Chars74KResized/L/img022-00001.png")).shape)
-        #print(np.array(resizedList[0][0]).shape)
         for x in resizedList:
-            print(textNetwork.getPredict(self.__netName,np.asarray([np.asarray(i) for i in x],dtype=np.float32)))
+            images=np.asarray([np.asarray(i) for i in x],dtype=np.float32)
+            images = images.reshape((images.shape[0], images.shape[1], images.shape[2], 1))
+            print(textNetwork.getPredict(self.__netName,images))
     def mainWindow(self,x,y,img,init):
         if init==False:
             self.__canvas.grid_forget()
