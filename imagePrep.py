@@ -52,7 +52,7 @@ def characterSegment(image):
 		x,y,w,h=cv2.boundingRect(ctr)#Creates a list of the bounding boxes for the characters
 		charlist.append(orig[y:y+h,x:x+w]) #'crops' the image arrays
 	return charlist #Adds the character images to a list
-def fitImage(image):
+def fitImage(image,black):
 	x,y=image.size
 	while x>40 or y>40:
 		x,y=(i/1.05 for i in (x,y))
@@ -63,7 +63,10 @@ def fitImage(image):
 			x,y=(i*1.05 for i in (x,y)) #Checks the size of the image and either enlarges it or shrinks it to fit
 	x,y=(int(math.floor(i)) for i in (x,y))
 	image=image.resize((x,y),Image.LANCZOS).convert("RGBA")
-	img=Image.new("1",(40,40),0)
+	if black:
+		img=Image.new("1",(40,40),0)
+	else:
+		img=Image.new("1",(40,40),1)
 	offset=((40-x)//2,(40-y)//2)
 	img.paste(image,offset) #Puts the image in the centre of a 40x40 black canvas
 	img.filter(ImageFilter.SMOOTH_MORE)#Smooths the image a bit 

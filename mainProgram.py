@@ -167,8 +167,9 @@ class GUI(Frame):
     def textScan(self):
         self.__img.save("tmp/temp.png")
         coordslist=imagePrep.textDetection("tmp/temp.png")#Runs the image through the textDetection
-        imagesList,threshedList,characterlist,resizedList=[],[],[],[]
+        imagesList,threshedList,characterlist,resizedList,centerlist=[],[],[],[],[]
         for i in coordslist:
+            centerlist.append([(i[2]-i[0])//2,(i[3]-i[1])//2])
             imagesList.append(self.__img.crop(i)) #Makes a list of each image of words as returned by textDetection
         for x in imagesList:
             x.save("tmp/temp2.png")
@@ -177,8 +178,11 @@ class GUI(Frame):
             x.save("tmp/temp2.png")
             characterlist.append([Image.fromarray(i) for i in imagePrep.characterSegment("tmp/temp2.png")]) #Creates a lst of segmented character images
         for x in characterlist:
-            resizedList.append([imagePrep.fitImage(i) for i in x]) #Creates a list of the resized characters
+            resizedList.append([imagePrep.fitImage(i,True) for i in x]) #Creates a list of the resized characters
         resizedList[0][0].show()
+        print (centerlist)
+        centerlist.sort(key=lambda x: x[1])
+        
         for x in resizedList:
             images=np.asarray([np.asarray(i) for i in x],dtype=np.float32)
             images = images.reshape((images.shape[0], images.shape[1], images.shape[2], 1))
