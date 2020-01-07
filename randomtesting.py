@@ -23,7 +23,3 @@ for i in dir:
             a=ImageOps.invert(a)
             a=a.convert('1')
             finalimages.append([a,i])
-#x=-1
-#for i in finalimages:
-    #x+=1
-    #i[0].save("Chars74KResized/"+i[1]+"/img"+str(x)+".png")
