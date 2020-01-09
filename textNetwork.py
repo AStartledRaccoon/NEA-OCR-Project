@@ -1,5 +1,5 @@
 #tensorFlowImages
-import tensorflow as tf, numpy as np, os, pathlib,random
+import tensorflow as tf, numpy as np, os,random
 from PIL import Image
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 def trainModel(epochs,batchSize,hiddenLayers,layerSize,filename):
@@ -16,8 +16,6 @@ def trainModel(epochs,batchSize,hiddenLayers,layerSize,filename):
            else:
                data.append(np.asarray(im))
                labels.append(dict[i])
-   #lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(0.001,decay_steps=(len(labels)/batchSize)*1000,decay_rate=1,staircase=False)
-   #optimiser=tf.keras.optimizers.Adam(tf.keras.optimizers.schedules.InverseTimeDecay(0.001,decay_steps=4922,decay_rate=0.5,staircase=False))
    c = list(zip(data, labels))
    random.shuffle(c)
    data, labels = zip(*c)
@@ -31,24 +29,36 @@ def trainModel(epochs,batchSize,hiddenLayers,layerSize,filename):
    data = data.reshape((data.shape[0], data.shape[1], data.shape[2], 1))
    testdata = testdata.reshape((testdata.shape[0], testdata.shape[1], testdata.shape[2], 1))
    inputShape=data.shape[1:]
-   earlystop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3)
+   earlystop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=2,verbose=1, mode='auto')
    model = tf.keras.models.Sequential()
+   model.add(tf.keras.layers.BatchNormalization(input_shape=inputShape))
+   model.add(tf.keras.layers.Conv2D(512, (3,3), activation=tf.keras.layers.LeakyReLU(alpha=0.1), padding="same", kernel_initializer='he_uniform'))
+   model.add(tf.keras.layers.MaxPooling2D((2, 2),padding="same"))
    model.add(tf.keras.layers.BatchNormalization())
-   model.add(tf.keras.layers.Conv2D(16, (3,3), activation='relu', kernel_initializer='he_uniform', input_shape=inputShape))
-   model.add(tf.keras.layers.MaxPooling2D((2, 2)))
-   model.add(tf.keras.layers.Conv2D(32, (3,3), activation='relu', kernel_initializer='he_uniform', input_shape=inputShape))
-   model.add(tf.keras.layers.MaxPooling2D((2, 2)))
-   model.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu'))
+   model.add(tf.keras.layers.Conv2D(512,  (3,3), activation=tf.keras.layers.LeakyReLU(alpha=0.1), padding="same", kernel_initializer='he_uniform'))
+   model.add(tf.keras.layers.MaxPooling2D((2, 2),padding="same"))
+   model.add(tf.keras.layers.BatchNormalization())
+   model.add(tf.keras.layers.Conv2D(256,  (3, 3), activation=tf.keras.layers.LeakyReLU(alpha=0.1),  padding="same",kernel_initializer='he_uniform'))
+   model.add(tf.keras.layers.MaxPooling2D((2, 2),padding="same"))
+   model.add(tf.keras.layers.BatchNormalization())
+   model.add(tf.keras.layers.Conv2D(128,  (3, 3), activation=tf.keras.layers.LeakyReLU(alpha=0.1),  padding="same",kernel_initializer='he_uniform'))
+   model.add(tf.keras.layers.MaxPooling2D((2, 2),padding="same"))
+   model.add(tf.keras.layers.BatchNormalization())
+   model.add(tf.keras.layers.Conv2D(64,  (3, 3), activation=tf.keras.layers.LeakyReLU(alpha=0.1),  padding="same",kernel_initializer='he_uniform'))
+   model.add(tf.keras.layers.MaxPooling2D((2, 2),padding="same"))
+   model.add(tf.keras.layers.BatchNormalization())
+   model.add(tf.keras.layers.Conv2D(32,  (3, 3), activation=tf.keras.layers.LeakyReLU(alpha=0.1),  padding="same",kernel_initializer='he_uniform'))
+   model.add(tf.keras.layers.MaxPooling2D((2, 2),padding="same"))
+   model.add(tf.keras.layers.BatchNormalization())
+   model.add(tf.keras.layers.Conv2D(16,  (3, 3), activation=tf.keras.layers.LeakyReLU(alpha=0.1),  padding="same",kernel_initializer='he_uniform'))
    model.add(tf.keras.layers.Flatten())
-   model.add(tf.keras.layers.Conv2D(128, (3, 3), activation='relu'))
-   model.add(tf.keras.layers.Flatten())
-   for i in range (0,hiddenLayers):
-     model.add( tf.keras.layers.Dense(layerSize, activation='relu'))
+   #for i in range (0,hiddenLayers):
+     #model.add( tf.keras.layers.Dense(layerSize, activation='relu'))
    model.add(tf.keras.layers.Dense(62, activation='softmax'))
    model.compile(optimizer="SGD",loss='sparse_categorical_crossentropy',metrics=['accuracy'])
-   model.fit(data, labels, epochs=epochs,batch_size=batchSize,validation_data=(testdata,testlabels),shuffle="batch",steps_per_epoch=None,verbose=1,use_multiprocessing=True,callbacks=earlystop)
+   model.fit(data, labels, epochs=epochs,batch_size=batchSize,validation_data=(testdata,testlabels),shuffle="batch",steps_per_epoch=None,verbose=1,use_multiprocessing=True,callbacks=[earlystop])
    model.evaluate(testdata,  testlabels, verbose=2)
-   model.save("models/"+filename+".h5")g
+   model.save("models/"+filename+".h5")
 def getPredict(filename,image):
     model=tf.keras.models.load_model("models/"+filename+".h5")
     reverseDict={0: '0', 1: '1', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9', 10: 'A', 11: 'B', 12: 'C', 13: 'D', 14: 'E', 15: 'F', 16: 'G', 17: 'H', 18: 'I', 19: 'J', 20: 'K', 21: 'L', 22: 'M', 23: 'N', 24: 'O', 25: 'P', 26: 'Q', 27: 'R', 28: 'S', 29: 'T', 30: 'U', 31: 'V', 32: 'W', 33: 'X', 34: 'Y', 35: 'Z', 36: 'a', 37: 'b', 38: 'c', 39: 'd', 40: 'e', 41: 'f', 42: 'g', 43: 'h', 44: 'i', 45: 'j', 46: 'k', 47: 'l', 48: 'm', 49: 'n', 50: 'o', 51: 'p', 52: 'q', 53: 'r', 54: 's', 55: 't', 56: 'u', 57: 'v', 58: 'w', 59: 'x', 60: 'y', 61: 'z'}
