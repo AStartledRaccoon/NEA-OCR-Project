@@ -1,5 +1,6 @@
 from imutils.object_detection import non_max_suppression
-import numpy as np, cv2, os, math,random
+import numpy as np, cv2, os,random
+from math import floor
 from PIL import Image, ImageFilter
 os.chdir(os.path.dirname(os.path.realpath(__file__)))#Sets the path to be where the file is incase it isn't already there 
 def textDetection(image):
@@ -61,7 +62,7 @@ def fitImage(image,black):
 			break
 		else:
 			x,y=(i*1.05 for i in (x,y)) #Checks the size of the image and either enlarges it or shrinks it to fit
-	x,y=(int(math.floor(i)) for i in (x,y))
+	x,y=(int(floor(i)) for i in (x,y))
 	image=image.resize((x,y),Image.LANCZOS).convert("RGBA")
 	if black:
 		img=Image.new("1",(40,40),0)
