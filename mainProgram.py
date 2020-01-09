@@ -17,20 +17,20 @@ class GUI(Frame):
         self.__hiddenSize=1129
         self.__batchSize=64
         self.__epochs=29
-        blankimg=Image.open("transparent.png")
-        self.mainWindow(595,842,blankimg,True) #Sets up the main window  with a placeholder image
+        blankImg=Image.open("transparent.png")
+        self.mainWindow(595,842,blankImg,True) #Sets up the main window  with a placeholder image
         self.__root.mainloop()
     def imageDialog(self):
         self.__filename=filedialog.askopenfilename(initialdir=os.path.expanduser('~/Pictures'),title="Select file",filetypes=(("Images","*.png *.jpg"),("PNG Images","*.png"),("JPEG Images","*.jpg"),("All files","*.*")))
         self.__userimg=Image.open(self.__filename)
         self.addImage(self.__userimg) #Gives the user a file dialog to upload the image
     def addImage(self,img):
-        imgsize=img.size
-        while imgsize[0]>1600 or imgsize[1]>900:
-            imgsize=[int(i//1.05) for i in imgsize]
-            img=img.resize(imgsize,Image.LANCZOS)
-        imgsize=[round(i/32)*32 for i in imgsize]
-        img=img.resize(imgsize,Image.LANCZOS) #Resizes the image to be less than 1600x900
+        imgSize=img.size
+        while imgSize[0]>1600 or imgSize[1]>900:
+            imgSize=[int(i//1.05) for i in imgSize]
+            img=img.resize(imgSize,Image.LANCZOS)
+        imgSize=[round(i/32)*32 for i in imgSize]
+        img=img.resize(imgSize,Image.LANCZOS) #Resizes the image to be less than 1600x900
         self.mainWindow(*img.size,img,False) #Reforms the main window
     def imageRotate(self, clockwise, img):
         if clockwise:
@@ -182,7 +182,6 @@ class GUI(Frame):
         resizedList[0][0].show()
         print (centerlist)
         centerlist.sort(key=lambda x: x[1])
-        
         for x in resizedList:
             images=np.asarray([np.asarray(i) for i in x],dtype=np.float32)
             images = images.reshape((images.shape[0], images.shape[1], images.shape[2], 1))
